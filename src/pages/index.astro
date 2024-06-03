@@ -1,17 +1,232 @@
 ---
+const response = await fetch("https://graphql.datocms.com/", {
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json',
+		'Accept': 'application/json',
+		'Authorization': `Bearer ${import.meta.env.DATOCMS_API_KEY}`
+	},
+	body: JSON.stringify({
+		query: `
+			query {
+				allServices {
+					id
+					title
+					description
+					link
+					_status
+					_firstPublishedAt
+				}
 
+				allWorks {
+					id
+					title
+					description
+					link
+					image {
+					responsiveImage {
+						src
+					}
+					}
+				}
+				
+				aboutMe {
+					description
+					image {
+						responsiveImage {
+							src
+						}
+					}
+					skills {
+						title
+						description
+					}
+					experience {
+						title
+						description
+					}
+					education {
+						title
+						description
+					}
+				}
+
+				header {
+					title
+					description
+					background {
+						responsiveImage {
+							src
+						}
+					}
+					navbarImage {
+						responsiveImage {
+							src
+						}
+					}
+				}
+
+				contact {
+					mail
+					number
+				}
+			}
+		`
+	}),
+});
+
+const json = await response.json();
+const services = json?.data?.allServices;
+const works = json?.data?.allWorks;
+const aboutMe = json?.data?.aboutMe;
+const skills = aboutMe?.skills;
+const experience = aboutMe?.experience;
+const education = aboutMe?.education;
+const header = json?.data?.header;
+const contact = json?.data?.contact;
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="stylesheet" href="/style/style.css" />
+		<link rel="stylesheet" href="/style/home.css" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro</title>
 	</head>
+
 	<body>
-		<h1>Astro</h1>
-		<img src="/images/logo.jpeg" alt="logo" />
+		<h1 class="hidden">Brako's Website</h1>
+		<div id="header" class="fade" style={`background-image: url(${header.background.responsiveImage.src})`}>
+			<div class="container">
+				<nav>
+					<a href="/"><img src={header.navbarImage.responsiveImage.src} alt="logo" class="logo"></a>
+					<ul id="sidemenu">
+						<li><a href="/">Home</a></li>
+						<li><a href="#about">About</a></li>
+						<li><a href="#services">Services</a></li>
+						<li><a href="#portfolio">Portfolio</a></li>
+						<li><a href="#contact">Contact</a></li>
+						<i class="fas fa-times" id="menu-close"></i>
+					</ul>
+					<i class="fas fa-bars" id="menu-button"></i>
+				</nav>
+				<div class="header-text">
+					<p>{header.title}</p>
+					<h2>{header.description}</h2>
+				</div>
+			</div>
+		</div>
+		
+		<div id="about" class="fade">
+			<div class="container">
+				<div class="row">
+					<div class="about-col-1">
+						<img src={aboutMe.image.responsiveImage.src} alt="logo" loading="lazy"/>
+					</div>
+					<div class="about-col-2">
+						<h2 class="sub-title">About Me</h2>
+						<p>{aboutMe.description}</p>
+						<div class="tab-titles">
+							<p data-tab="skills" class="tab-links active-link">Skills</p>
+							<p data-tab="experience" class="tab-links">Experience</p>
+							<p data-tab="education" class="tab-links">Education</p>
+						</div>
+						<div class="tab-contents active-tab" id="skills">
+							<ul>
+								{skills.map((skill: any) => (
+									<li><span>{skill.title}</span><br>{skill.description}</li>
+								))}
+							</ul>
+						</div>
+						<div class="tab-contents" id="experience">
+							<ul>
+								{experience.map((experience: any) => (
+									<li><span>{experience.title}</span><br>{experience.description}</li>
+								))}
+							</ul>
+						</div>
+						<div class="tab-contents" id="education">
+							<ul>
+								{education.map((education: any) => (
+									<li><span>{education.title}</span><br>{education.description}</li>
+								))}
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="services" class="services fade">
+			<div class="container">
+				<h2 class="sub-title">My Services</h2>
+				<div class="services-list list">
+					{services.map((service: any) => (
+						<div>
+							<i class="fa-solid fa-pen"></i>
+							<h2>{service.title}</h2>
+							<p>{service.description}</p>
+							<a href={service.link}>Learn more</a>
+						</div>
+					))}
+				</div>
+			</div>
+		</div>
+	
+		<div id="portfolio" class="portfolio fade">
+			<div class="container">
+				<h2 class="sub-title">My Work</h2>
+				<div class="work-list list">
+					{works.map((work: any) => (
+						<div class="work">
+							<img src={work.image.responsiveImage.src} alt="work-image" />
+							<div class="layer">
+								<h3>{work.title}</h3>
+								<p>{work.description}</p>
+								<a href={work.link}><i class="fas fa-external-link-alt"></i></a>
+							</div>
+						</div>
+					))}
+				</div>
+				<a href="#" class="btn">See more</a>
+			</div>
+		</div>
+
+		<div id="contact" class="contact fade">
+			<div class="container">
+				<div class="row">
+					<div class="contact-left">
+						<h2 class="sub-title">Contact me</h2>
+						<p><i class="fas fa-paper-plane"></i> {contact.mail}</p>
+						<p><i class="fas fa-phone-square-alt"></i> {contact.number}</p>
+						<div class="social-icons">
+							<a href="https://x.com"><i class="fa-brands fa-x-twitter"></i></a>
+							<a href="https://instagram.com"><i class="fa-brands fa-instagram"></i></a>
+							<a href="https://linkedin.com"><i class="fa-brands fa-linkedin"></i></a>
+						</div>
+						<a href={contact.cv} class="btn btn2">Download CV</a>
+					</div>
+					<div class="contact-right">
+						<form>
+							<input type="text" name="Name", placeholder="Your Name" required>
+							<input type="email" name="email" placeholder="Your Email" required>
+							<textarea name="Message" rows="6" placeholder="Your message"></textarea>
+							<button type="submit" class="btn btn2">Submit</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="copyright test">
+			<p>Copyright © Brako. Made with AstroJS by Azurioh</p>
+		</div>
 	</body>
+
+	<script is:inline src="https://kit.fontawesome.com/0c3f0b411b.js" crossorigin="anonymous"></script>
+	<script is:inline src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+	<script is:inline src="/js/home.js"></script>
 </html>
